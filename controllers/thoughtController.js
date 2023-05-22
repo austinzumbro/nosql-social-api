@@ -28,7 +28,12 @@ const getSingleThought = async (req, res) => {
 const createThought = async (req, res) => {
   try {
     const thought = await Thought.create(req.body);
-    res.status(200).json(thought);
+    const user = await User.findOneAndUpdate(
+      { $or: [{ username: thought.username }, { _id: thought.userId }] },
+      { $addToSet: { thoughts: thought } },
+      { runValidators: true, new: true }
+    );
+    res.status(200).json({ thought: thought, user: user });
   } catch (err) {
     console.error(err);
     res.status(500).json(err);
@@ -58,6 +63,7 @@ const deleteThought = async (req, res) => {
     const thought = await Thought.findOneAndRemove({
       _id: req.params.thoughtId,
     });
+    const user = await User.findOneAndUpdate({ reactions });
     !thought
       ? res.status(404).json({ message: "No thought found with that ID." })
       : res.status(200).json({ user: user, thoughts: thoughts });
