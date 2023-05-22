@@ -51,7 +51,7 @@ const updateThought = async (req, res) => {
     );
     !thought
       ? res.status(404).json({ message: "No thought found with that ID." })
-      : res.status(200).json(user);
+      : res.status(200).json(thought);
   } catch (err) {
     console.error(err);
     res.status(500).json(err);
@@ -63,10 +63,14 @@ const deleteThought = async (req, res) => {
     const thought = await Thought.findOneAndRemove({
       _id: req.params.thoughtId,
     });
-    const user = await User.findOneAndUpdate({ reactions });
+    const user = await User.findOneAndUpdate(
+      { username: thought.username },
+      { $pull: { thoughts: thought._id } },
+      { runValidators: true, new: true }
+    );
     !thought
       ? res.status(404).json({ message: "No thought found with that ID." })
-      : res.status(200).json({ user: user, thoughts: thoughts });
+      : res.status(200).json({ user: user, deletedThought: thought });
   } catch (err) {
     console.error(err);
     res.status(500).json(err);
@@ -92,12 +96,12 @@ const createReaction = async (req, res) => {
 const deleteReaction = async (req, res) => {
   try {
     const thought = await Thought.findOneAndUpdate(
-      { _id: req.params.userId },
+      { _id: req.params.thoughtId },
       { $pull: { reactions: { reactionId: req.params.reactionId } } },
       { runValidators: true, new: true }
     );
     !thought
-      ? res.status(404).json({ message: "No user found with that ID" })
+      ? res.status(404).json({ message: "No thought found with that ID" })
       : res.status(200).json(thought);
   } catch (err) {
     console.error(err);

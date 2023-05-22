@@ -13,7 +13,10 @@ const getUsers = async (req, res) => {
 
 const getSingleUser = async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.params.userId }).select("-__v");
+    const user = await User.findOne({ _id: req.params.userId })
+      .select("-__v")
+      .populate("friends")
+      .populate("thoughts");
     !user
       ? res.status(404).json({ message: "No user with that ID" })
       : res.status(200).json(user);
@@ -54,7 +57,7 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findOneAndRemove({ _id: req.params.userId });
-    const thoughts = await Thought.deleteMany({ username: user.username });
+    const thoughts = await Thought.deleteMany({ _id: { $in: user.thoughts } });
     !user
       ? res.status(404).json({ message: "No user found with that ID." })
       : res.status(200).json({ deletedUser: user, deletedThoughts: thoughts });

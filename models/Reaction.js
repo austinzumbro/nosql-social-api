@@ -30,11 +30,11 @@ const reactionSchema = new Schema(
           hour12: true,
         };
 
-        const formattedDate = currentDate.toLocaleDateString(
+        const formattedDate = date.toLocaleDateString(
           undefined,
           dateFormatOptions
         );
-        const formattedTime = currentDate.toLocaleTimeString(
+        const formattedTime = date.toLocaleTimeString(
           undefined,
           timeFormatOptions
         );
